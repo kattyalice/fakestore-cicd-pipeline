@@ -1,27 +1,30 @@
 import React from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { Link } from 'react-router-dom';
-import "./Navbar.css"
+import "./Navbar.css";
 
 const Navbar = () => {
-    const { user } = useAuth();
+  const { user } = useAuth();
+
   return (
     <div className='nav-container'>
-        <Link to='/' className='link'>Home</Link>
-        <Link to='/cart' className='link'>Cart</Link>
-        {user ? (
-            <>
-                <Link to='/profile' className='link'>Profile</Link>
-                <Link to='/logout' className='link'>Logout</Link>
-            </>
-        ) : (
-            <>
-                <Link to='/register' className='link'>Register</Link>
-                <Link to='/login' className='link'>Login</Link>
-            </>
-        )}
+      <Link to='/' className='link'>Home</Link>
+      <Link to='/cart' className='link'>Cart</Link>
+      {user ? (
+          <>
+          <Link to='/profile' className='link'>Profile</Link>
+          <Link to='/add-product' className='link'>Add Product</Link>
+          <Link to='/orders' className='link'>Order History</Link>
+          <Link to='/logout' className='link'>Logout</Link>
+        </>
+      ) : (
+        <>
+          <Link to='/register' className='link'>Register</Link>
+          <Link to='/login' className='link'>Login</Link>
+        </>
+      )}
     </div>
-  )
-}
+  );
+};
 
-export default Navbar
+export default Navbar;

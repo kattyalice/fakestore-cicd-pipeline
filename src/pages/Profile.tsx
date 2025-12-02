@@ -1,76 +1,120 @@
-import { useState } from "react";
+// src/pages/Profile.tsx
+import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
-import { updateProfile, deleteUser } from 'firebase/auth';
-import styles from '../styles/auth-styles';
+import { db } from "../lib/firebase";
+import { doc, updateDoc, deleteDoc } from "firebase/firestore";
+import styles from "../styles/auth-styles";
 
 const Profile: React.FC = () => {
-  const {user} = useAuth();
-  const [displayName, setDisplayName] = useState(user?.displayName || '');
-  const [email, setEmail] = useState(user?.email || '');
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  const { user, profile, logout } = useAuth();
 
-  const handleUpdateProfile = async (e: React.FormEvent<HTMLFormElement>) => {
+  const [name, setName] = useState(profile?.name ?? "");
+  const [address, setAddress] = useState(profile?.address ?? "");
+  const [message, setMessage] = useState("");
+
+  // Sync form state with profile once it's loaded
+  useEffect(() => {
+    if (profile) {
+      setName(profile.name ?? "");
+      setAddress(profile.address ?? "");
+    }
+  }, [profile]);
+
+  // UPDATE Firestore user doc
+  const handleUpdate = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setError('');
-    if(!user) {
-      setError('User not found');
+
+    if (!user || !profile) {
+      setMessage("User not found.");
       return;
     }
+
     try {
-      await updateProfile(user, {
-        displayName: displayName,
+      await updateDoc(doc(db, "users", profile.id), {
+        name: name,
+        address: address,
       });
-      setSuccess('Profile updated successfully');
-    } catch (error: any) {
-      setError(error.message);
+
+      setMessage("Profile updated!");
+    } catch {
+      setMessage("Error updating profile.");
     }
   };
 
-  const handleDeleteAccount = async () => {
+  // DELETE Firestore doc + Firebase account
+  const handleDelete = async () => {
+    if (!user || !profile) {
+      setMessage("User not found.");
+      return;
+    }
+
+    const confirm = window.confirm("Are you sure you want to delete your account?");
+    if (!confirm) return;
+
     try {
-      if (!user) {
-        setError('User not found');
-        return;
-      }
-      await deleteUser(user);
-      setSuccess('Account deleted successfully');
-    } catch (error: any) {
-      setError(error.message);
+      await deleteDoc(doc(db, "users", profile.id)); // Firestore document
+      await user.delete(); // Firebase Auth account
+      setMessage("Account deleted.");
+    } catch {
+      setMessage("Error deleting account.");
     }
   };
+
+  if (!user || !profile) {
+    return <h2 style={{ marginTop: "20px" }}>Please log in to view your profile.</h2>;
+  }
 
   return (
-    <div>
-      <h1>Profile</h1>
-      <form onSubmit={handleUpdateProfile}>
-        <input
-          style={styles.input}
-          type='text'
-          value={displayName}
-          onChange={(e) => setDisplayName(e.target.value)}
-          placeholder='Name'
-        />
-        <input
-          style={styles.input}
-          disabled={true}
-          type='email'
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder='Email'
-        />
-        <button style={styles.button} type='submit'>Update Profile</button>
-        {success && <p style={styles.success}>{success}</p>}
-        {error && <p style={styles.error}>{error}</p>}
-        <div>
-          <button
-            onClick={handleDeleteAccount}
-            style={styles.deleteAccountButton}
-            >Delete Account</button>
-        </div>
-      </form>
-    </div>
-  )
-}
+    <div style={{ marginTop: "20px" }}>
+      <h1>Your Profile</h1>
 
-export default Profile
+      <form onSubmit={handleUpdate} style={{ display: "flex", flexDirection: "column", width: "300px", gap: "10px" }}>
+        
+        <input
+          style={styles.input}
+          type="text"
+          placeholder="Your Name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+        />
+
+        <input
+          style={styles.input}
+          type="text"
+          placeholder="Your Address"
+          value={address}
+          onChange={(e) => setAddress(e.target.value)}
+        />
+
+        <input
+          style={styles.input}
+          type="email"
+          value={profile.email}
+          disabled
+        />
+
+        <button style={styles.button} type="submit">
+          Update Profile
+        </button>
+      </form>
+
+      {message && <p>{message}</p>}
+
+      <button
+        onClick={handleDelete}
+        style={{ ...styles.deleteAccountButton, marginTop: "15px" }}
+      >
+        Delete Account
+      </button>
+
+      <button
+        onClick={logout}
+        style={{ marginTop: "10px" }}
+      >
+        Logout
+      </button>
+    </div>
+  );
+};
+
+export default Profile;

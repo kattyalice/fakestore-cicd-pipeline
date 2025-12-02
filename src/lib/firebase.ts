@@ -1,4 +1,5 @@
 import { initializeApp } from "firebase/app";
+import { getFirestore } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 
 const firebaseConfig = {
@@ -8,8 +9,11 @@ const firebaseConfig = {
   storageBucket: "front-end-fakestore.firebasestorage.app",
   messagingSenderId: "916602576095",
   appId: "1:916602576095:web:d55eb6a9e6d3951cad9d6a",
-  measurementId: "G-PJ0B99LX18"
+  measurementId: "G-PJ0B99LX18",
 };
 
 const app = initializeApp(firebaseConfig);
-export const auth = getAuth(app)
+
+export const db = getFirestore(app);
+
+export const auth = getAuth(app);
