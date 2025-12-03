@@ -28,6 +28,12 @@ jest.mock("../src/redux/hooks", () => ({
   useAppDispatch: jest.fn(),
 }));
 
+jest.mock("react-bootstrap", () => ({
+  Button: ({ children, ...props }: any) => <button {...props}>{children}</button>,
+  Modal: ({ children, ...props }: any) => <div {...props}>{children}</div>,
+}));
+
+
 // 👍 Now imports
 import { render, screen, fireEvent } from "@testing-library/react";
 import ProductCard from "../src/components/ProductCard";

@@ -24,6 +24,28 @@ jest.mock("../src/lib/firebase", () => ({
   db: {},
 }));
 
+jest.mock("react-bootstrap", () => {
+  const Mock = ({ children, ...props }: any) => <div {...props}>{children}</div>;
+
+  return {
+    Button: Mock,
+    Container: Mock,
+    Row: Mock,
+    Col: Mock,
+    Image: Mock,
+    Modal: Object.assign(Mock, {
+      Header: Mock,
+      Title: Mock,
+      Body: Mock,
+      Footer: Mock,
+    }),
+    ListGroup: Object.assign(Mock, {
+      Item: Mock,
+    }),
+  };
+});
+
+
 // 👍 Now imports
 import { render, screen, fireEvent } from "@testing-library/react";
 import { Provider } from "react-redux";
