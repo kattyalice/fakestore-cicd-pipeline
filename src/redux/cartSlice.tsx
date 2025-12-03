@@ -35,11 +35,11 @@ const cartSlice = createSlice({
             }
             sessionStorage.setItem('cart', JSON.stringify(state.items));
         },
-        removeFromCart: (state, action: PayloadAction<number>) => {
+        removeFromCart: (state, action: PayloadAction<string>) => {
             state.items = state.items.filter(item => item.id !== action.payload);
             sessionStorage.setItem('cart', JSON.stringify(state.items));
         },
-        updateCart: (state, action:PayloadAction<{id: number; count: number}>) => {
+        updateCart: (state, action:PayloadAction<{id: string; count: number}>) => {
             const { id, count } = action.payload;
             const item = state.items.find(item => item.id === id);
 
