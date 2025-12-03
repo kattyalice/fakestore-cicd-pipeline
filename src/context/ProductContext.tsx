@@ -1,3 +1,4 @@
+// src/context/ProductContext.tsx
 import { createContext, useContext, type ReactNode, useReducer } from "react";
 import type { Product } from "../types/types";
 
@@ -25,7 +26,7 @@ const productReducer = (
     case "SET_SELECTED_CATEGORY":
       return { ...state, selectedCategory: action.payload };
     default:
-      throw new Error(`Unhandled action type: ${action.type}`);
+      return state;
   }
 };
 
@@ -33,21 +34,14 @@ interface ProductContextType extends ProductState {
   dispatch: React.Dispatch<ProductAction>;
 }
 
-/* ⭐ Stable default value (no undefined context issues) */
 const ProductContext = createContext<ProductContextType>({
-  ...initialState,
+  products: [],
+  selectedCategory: "",
   dispatch: () => {},
 });
 
-interface ProductProviderProps {
-  children: ReactNode;
-}
-
-export const ProductProvider: React.FC<ProductProviderProps> = ({ children }) => {
-  /* ⭐ MAIN FIX — explicitly type the reducer so action ≠ never */
-  const [state, dispatch] = useReducer<
-    React.Reducer<ProductState, ProductAction>
-  >(productReducer, initialState);
+export const ProductProvider = ({ children }: { children: ReactNode }) => {
+  const [state, dispatch] = useReducer(productReducer, initialState);
 
   return (
     <ProductContext.Provider value={{ ...state, dispatch }}>
@@ -56,6 +50,4 @@ export const ProductProvider: React.FC<ProductProviderProps> = ({ children }) =>
   );
 };
 
-export const useProductContext = (): ProductContextType => {
-  return useContext(ProductContext);
-};
+export const useProductContext = () => useContext(ProductContext);
