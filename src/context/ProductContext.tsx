@@ -33,7 +33,7 @@ interface ProductContextType extends ProductState {
   dispatch: React.Dispatch<ProductAction>;
 }
 
-/* ⭐ FIX HERE — give createContext a non-undefined default */
+/* ⭐ Stable default value (no undefined context issues) */
 const ProductContext = createContext<ProductContextType>({
   ...initialState,
   dispatch: () => {},
@@ -44,7 +44,10 @@ interface ProductProviderProps {
 }
 
 export const ProductProvider: React.FC<ProductProviderProps> = ({ children }) => {
-  const [state, dispatch] = useReducer(productReducer, initialState);
+  /* ⭐ MAIN FIX — explicitly type the reducer so action ≠ never */
+  const [state, dispatch] = useReducer<
+    React.Reducer<ProductState, ProductAction>
+  >(productReducer, initialState);
 
   return (
     <ProductContext.Provider value={{ ...state, dispatch }}>
@@ -54,6 +57,5 @@ export const ProductProvider: React.FC<ProductProviderProps> = ({ children }) =>
 };
 
 export const useProductContext = (): ProductContextType => {
-  const context = useContext(ProductContext);
-  return context;
+  return useContext(ProductContext);
 };
