@@ -12,3 +12,17 @@ export interface Product {
 }
 
 export type Category = string;
+
+export interface UserProfile {
+  name?: string;
+  address?: string;
+  email: string;
+}
+
+
+export interface UserProfile {
+  id: string;
+  name?: string;
+  address?: string;
+  email: string;
+}

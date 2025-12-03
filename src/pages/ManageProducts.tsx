@@ -7,26 +7,32 @@ import type { Product } from "../types/types";
 const ManageProducts = () => {
   const [products, setProducts] = useState<Product[]>([]);
 
-  // Fields for editing each product
   const [editedTitle, setEditedTitle] = useState("");
   const [editedPrice, setEditedPrice] = useState("");
   const [editedCategory, setEditedCategory] = useState("");
   const [editedDescription, setEditedDescription] = useState("");
   const [editedImage, setEditedImage] = useState("");
 
-  // Fetch products on load
   useEffect(() => {
     const fetchProducts = async () => {
       const snapshot = await getDocs(collection(db, "products"));
-      const list = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...(doc.data() as Product),
-      }));
+      
+      const list = snapshot.docs.map((d) => {
+        const data = d.data() as Product;
+        return {
+          ...data,
+          id: d.id, // ⭐ FIX: id last to avoid duplicate key warning
+        };
+      });
+
       setProducts(list);
     };
 
     fetchProducts();
   }, []);
+
+  // ... rest of your file unchanged ...
+
 
   // Update product in Firestore
   const updateProduct = async (productId: string) => {

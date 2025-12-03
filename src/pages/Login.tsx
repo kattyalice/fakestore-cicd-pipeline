@@ -13,21 +13,19 @@ const Login = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  // Redirect logged-in users to HOME
   useEffect(() => {
     if (user) {
       navigate("/");
     }
   }, [user, navigate]);
 
-  // Login form submit
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError("");
 
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      navigate("/"); // redirect to HOME on success
+      navigate("/");
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : "Login failed.";
@@ -36,17 +34,19 @@ const Login = () => {
   };
 
   return (
-    <div style={styles.form}>
+    <div style={styles.form as React.CSSProperties}>
       <h1>Login</h1>
 
       <form onSubmit={handleSubmit}>
-        {error && <p style={styles.error}>{error}</p>}
+        {error && (
+          <p style={styles.error as React.CSSProperties}>{error}</p>
+        )}
 
-        <fieldset style={styles.fieldset}>
-          <legend style={styles.legend}>Login</legend>
+        <fieldset style={styles.fieldset as React.CSSProperties}>
+          <legend style={styles.legend as React.CSSProperties}>Login</legend>
 
           <input
-            style={styles.input}
+            style={styles.input as React.CSSProperties}
             type="email"
             placeholder="Email"
             value={email}
@@ -54,7 +54,7 @@ const Login = () => {
           />
 
           <input
-            style={styles.input}
+            style={styles.input as React.CSSProperties}
             type="password"
             placeholder="Password"
             value={password}
