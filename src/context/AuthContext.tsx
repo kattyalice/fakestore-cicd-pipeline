@@ -11,12 +11,8 @@ import {
 import { db, auth } from "../lib/firebase";
 import { doc, getDoc, setDoc, updateDoc, deleteDoc } from "firebase/firestore";
 
-// Firestore user shape
-interface UserProfile {
-  name: string;
-  email: string;
-  address?: string;
-}
+// ⬅ REMOVE the duplicate interface here
+import type { UserProfile } from "../types/types";
 
 interface AuthContextType {
   user: User | null;
@@ -42,17 +38,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
 
-  // Load Firestore profile
   const loadUserProfile = async (uid: string) => {
     const userRef = doc(db, "users", uid);
     const snapshot = await getDoc(userRef);
 
     if (snapshot.exists()) {
-      setProfile(snapshot.data() as UserProfile);
+      const data = snapshot.data();
+      setProfile({
+        id: snapshot.id,
+        name: data.name,
+        email: data.email,
+        address: data.address ?? "",
+      });
     }
   };
 
-  // Listen for login/logout
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
@@ -67,44 +67,43 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return () => unsub();
   }, []);
 
-  // Register new user
   const register = async (email: string, password: string, name: string) => {
     const cred = await createUserWithEmailAndPassword(auth, email, password);
 
     await updateProfile(cred.user, { displayName: name });
 
     const userDoc = {
-      name: name,
+      name,
       email: cred.user.email || "",
       address: "",
     };
 
     await setDoc(doc(db, "users", cred.user.uid), userDoc);
-    setProfile(userDoc);
+
+    setProfile({
+      id: cred.user.uid,
+      ...userDoc,
+    });
   };
 
-  // Login
   const login = async (email: string, password: string) => {
     await signInWithEmailAndPassword(auth, email, password);
   };
 
-  // Logout
   const logout = async () => {
     setProfile(null);
     await signOut(auth);
   };
 
-  // Update profile in Firestore
   const updateProfileData = async (data: Partial<UserProfile>) => {
     if (!user) return;
 
     const userRef = doc(db, "users", user.uid);
     await updateDoc(userRef, data);
 
-    setProfile((prev) => prev ? { ...prev, ...data } : prev);
+    setProfile((prev) => (prev ? { ...prev, ...data } : prev));
   };
 
-  // Delete account
   const deleteAccount = async () => {
     if (!user) return;
 
